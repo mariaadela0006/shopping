@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOPPING TIME - CLASSROOM EDITION</title>
+    <style>
+        :root {
+            --primary-bg: #fdf6e3;
+            --team1-color: #ff4757;
+            --team2-color: #2ed573;
+            --accent-color: #ffa502;
+            --text-dark: #2f3542;
+            --font-main: 'Arial Black', Gadget, sans-serif;
+            --cheap-color: #2ecc71;
+            --medium-color: #f1c40f;
+            --expensive-color: #e74c3c;
+            --bonus-color: #9b59b6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: #333;
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('home_bg.png');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: var(--text-dark);
+        }
+
+        #fs-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 9999;
+            background: rgba(255,255,255,0.8);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            border: 12px solid var(--accent-color);
+            max-width: 90%;
+        }
+
+        h1 { font-size: 6rem; color: var(--accent-color); text-shadow: 6px 6px 0px #000; margin-bottom: 20px; }
+
+        .btn-large {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 30px 80px;
+            font-size: 4rem;
+            border-radius: 80px;
+            cursor: pointer;
+            box-shadow: 0 12px 0 #cc8400;
+            font-weight: bold;
+        }
+
+        #game-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            background: rgba(245, 245, 245, 0.98);
+        }
+
+        .turn-banner {
+            background: var(--accent-color);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 3rem;
+            width: 100%;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .main-layout {
+            display: flex;
+            flex: 1;
+            padding: 10px 20px;
+            gap: 15px;
+            align-items: center;
+            overflow: hidden;
+            min-height: 0; 
+        }
+
+        .team-sidebar {
+            width: 20%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .side-char-img {
+            height: 180px; 
+            max-height: 22vh;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        .wallet-card {
+            background: white;
+            border: 8px solid #ccc;
+            border-radius: 25px;
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+        }
+
+        .wallet-card.active {
+            transform: scale(1.05);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 30px var(--accent-color);
+        }
+
+        .wallet-label { font-size: 1.5rem; }
+        .wallet-value { font-size: 2.5rem; color: #222; }
+
+        .stage-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 10px;
+        }
+
+        .bubble {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 80px;
+            border: 10px solid #333;
+            width: 100%;
+            max-width: 1000px;
+            text-align: center;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.1);
+        }
+
+        .question-text { font-size: 2.8rem; color: #d35400; margin-bottom: 15px; }
+        .sentence-text { font-size: 3.8rem; font-weight: 900; line-height: 1.2; }
+        .sentence-blank { color: #2980b9; border-bottom: 8px solid #2980b9; padding: 0 15px; }
+
+        .bottom-area {
+            height: 48%; 
+            background: #2f3542;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 12px;
+            padding: 15px;
+            flex-shrink: 0;
+            border-top: 10px solid var(--accent-color);
+        }
+
+        .item-btn {
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 6px solid #fff;
+            transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            overflow: hidden;
+            padding: 5px;
+        }
+
+        .item-btn:hover:not(.disabled) {
+            transform: translateY(-5px);
+            background: #fff;
+            border-color: var(--accent-color);
+        }
+
+        .item-btn img { 
+            height: 60%;
+            width: auto;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+        
+        .item-btn span { 
+            font-size: 2.2rem; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            color: #1e272e;
+            text-shadow: 1px 1px 0px rgba(255,255,255,1);
+            line-height: 1;
+            text-align: center;
+        }
+
+        .item-btn.disabled { filter: grayscale(100%); opacity: 0.2; cursor: default; }
+
+        .feedback-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+            display: none;
+            width: 80%;
+        }
+
+        .feedback-content {
+            background: white;
+            border-radius: 60px;
+            padding: 40px;
+            border: 25px solid white;
+            text-align: center;
+            animation: popOut 5s forwards;
+            box-shadow: 0 0 150px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .feedback-gif {
+            height: 250px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 20px;
+        }
+
+        .feedback-text { font-size: 7rem; font-weight: 900; line-height: 1; }
+
+        @keyframes popOut {
+            0% { transform: scale(0); opacity: 0; }
+            10% { transform: scale(1.1); opacity: 1; }
+            90% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="fs-btn" onclick="toggleFullScreen()">📺 Full Screen</button>
+
+    <div id="start-screen" class="screen">
+        <div class="modal">
+            <img src="cashier.png" alt="Cashier" style="height: 300px;" onerror="this.src='https://via.placeholder.com/200?text=CASHIER'">
+            <h1>SHOPPING TIME</h1>
+            <button class="btn-large" onclick="startGame()">START GAME</button>
+        </div>
+    </div>
+
+    <div id="win-screen" class="screen" style="display:none;">
+        <div class="modal">
+            <h1 id="winner-text">Team 1 Wins!</h1>
+            <div style="display: flex; gap: 60px; justify-content: center; margin: 30px 0;">
+                <div><p id="final-money-1" style="font-size: 5rem; color: var(--team1-color);">$0</p></div>
+                <div><p id="final-money-2" style="font-size: 5rem; color: var(--team2-color);">$0</p></div>
+            </div>
+            <button class="btn-large" onclick="location.reload()">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <div id="game-screen">
+        <div id="turn-display" class="turn-banner">Team 1's Turn</div>
+        
+        <div class="main-layout">
+            <div class="team-sidebar">
+                <img src="girl1.png" class="side-char-img" onerror="this.src='https://via.placeholder.com/150?text=GIRL'">
+                <div id="area-t1" class="wallet-card active" style="border-color: var(--team1-color)">
+                    <div class="wallet-label">TEAM 1</div>
+                    <div id="wallet-t1" class="wallet-value">$20,000</div>
+                </div>
+            </div>
+
+            <div class="stage-area">
+                <div class="bubble">
+                    <div class="question-text">“What would you like to buy?”</div>
+                    <div class="sentence-text">I'd like to buy a/some <span id="answer-blank" class="sentence-blank">_________</span>.</div>
+                </div>
+            </div>
+
+            <div class="team-sidebar">
+                <img src="boy1.png" class="side-char-img" onerror="this.src='https://via.placeholder.com/150?text=BOY'">
+                <div id="area-t2" class="wallet-card" style="border-color: var(--team2-color)">
+                    <div class="wallet-label">TEAM 2</div>
+                    <div id="wallet-t2" class="wallet-value">$20,000</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-area" id="item-container"></div>
+    </div>
+
+    <div id="feedback-layer" class="feedback-popup">
+        <div class="feedback-content" id="fb-content">
+            <img id="fb-gif" class="feedback-gif" src="" alt="Feedback GIF" onerror="this.style.display='none'">
+            <div id="fb-text" class="feedback-text">CHEAP!</div>
+        </div>
+    </div>
+
+    <script>
+        const items = [
+            { id: 'cap', img: 'cap.png', name: 'cap', icon: '🧢' },
+            { id: 'scarf', img: 'scarf.png', name: 'scarf', icon: '🧣' },
+            { id: 'blouse', img: 'blouse.png', name: 'blouse', icon: '👚' },
+            { id: 'polo', img: 'poloshirt.png', name: 'polo shirt', icon: '👕' },
+            { id: 'belt', img: 'belt.png', name: 'belt', icon: '🎫' },
+            { id: 'sunglasses', img: 'sunglasses.png', name: 'sunglasses', icon: '🕶️' },
+            { id: 'gloves', img: 'gloves.png', name: 'gloves', icon: '🧤' },
+            { id: 'trousers', img: 'trousers.png', name: 'trousers', icon: '👖' },
+            { id: 'boots', img: 'boots.png', name: 'boots', icon: '🥾' },
+            { id: 'socks', img: 'socks.png', name: 'socks', icon: '🧦' }
+        ];
+
+        let gameState = {
+            currentTeam: 1,
+            wallets: { 1: 20000, 2: 20000 },
+            disabledItems: [],
+            isProcessing: false
+        };
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        function initItems() {
+            const container = document.getElementById('item-container');
+            container.innerHTML = '';
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'item-btn';
+                div.id = `btn-${item.id}`;
+                div.innerHTML = `
+                    <img src="${item.img}" onerror="this.src='https://via.placeholder.com/120?text=${item.icon}'">
+                    <span>${item.name}</span>
+                `;
+                div.onclick = () => handleItemClick(item);
+                container.appendChild(div);
+            });
+        }
+
+        function startGame() {
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'flex';
+            initItems();
+            updateUI();
+        }
+
+        function handleItemClick(item) {
+            if (gameState.isProcessing || gameState.disabledItems.includes(item.id)) return;
+            
+            gameState.isProcessing = true;
+            document.getElementById('answer-blank').innerText = item.name;
+            
+            const btn = document.getElementById(`btn-${item.id}`);
+            btn.classList.add('disabled');
+            gameState.disabledItems.push(item.id);
+
+            let price;
+            let category;
+            let color;
+            let gifSrc;
+            
+            const luckyRoll = Math.random();
+            if (luckyRoll < 0.05) {
+                price = 1;
+                category = "DISCOUNTED!";
+                color = "var(--bonus-color)";
+                gifSrc = "cheap.gif";
+            } else {
+                price = Math.floor(Math.random() * (1000 - 100 + 1)) + 100;
+                
+                if (price <= 400) {
+                    category = "CHEAP!";
+                    color = "var(--cheap-color)";
+                    gifSrc = "cheap.gif";
+                } else if (price <= 700) {
+                    category = "JUST OK!";
+                    color = "var(--medium-color)";
+                    gifSrc = "okay.gif";
+                } else {
+                    category = "EXPENSIVE!";
+                    color = "var(--expensive-color)";
+                    gifSrc = "sad.gif";
+                }
+            }
+
+            gameState.wallets[gameState.currentTeam] -= price;
+
+            const fbLayer = document.getElementById('feedback-layer');
+            const fbContent = document.getElementById('fb-content');
+            const fbText = document.getElementById('fb-text');
+            const fbGif = document.getElementById('fb-gif');
+
+            fbLayer.style.display = 'flex';
+            fbContent.style.borderColor = color;
+            fbGif.style.display = 'block';
+            fbGif.src = gifSrc + "?t=" + new Date().getTime();
+            
+            fbText.innerHTML = `${category}<br><span style="font-size: 6rem">$${price.toLocaleString()}</span>`;
+            fbText.style.color = color;
+
+            setTimeout(() => {
+                fbLayer.style.display = 'none';
+                document.getElementById('answer-blank').innerText = '_________';
+                
+                if (gameState.disabledItems.length >= items.length) resetItems();
+                
+                gameState.currentTeam = gameState.currentTeam === 1 ? 2 : 1;
+                gameState.isProcessing = false;
+
+                if (gameState.wallets[1] <= 0 || gameState.wallets[2] <= 0) endGame();
+                else updateUI();
+            }, 5000);
+        }
+
+        function resetItems() {
+            gameState.disabledItems = [];
+            document.querySelectorAll('.item-btn').forEach(b => b.classList.remove('disabled'));
+        }
+
+        function updateUI() {
+            document.getElementById('wallet-t1').innerText = `$${gameState.wallets[1].toLocaleString()}`;
+            document.getElementById('wallet-t2').innerText = `$${gameState.wallets[2].toLocaleString()}`;
+            
+            const t1Card = document.getElementById('area-t1');
+            const t2Card = document.getElementById('area-t2');
+            const banner = document.getElementById('turn-display');
+
+            if (gameState.currentTeam === 1) {
+                t1Card.classList.add('active');
+                t2Card.classList.remove('active');
+                banner.innerText = "TEAM 1'S TURN";
+                banner.style.background = "var(--team1-color)";
+            } else {
+                t1Card.classList.remove('active');
+                t2Card.classList.add('active');
+                banner.innerText = "TEAM 2'S TURN";
+                banner.style.background = "var(--team2-color)";
+            }
+        }
+
+        function endGame() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('win-screen').style.display = 'flex';
+            const w1 = gameState.wallets[1], w2 = gameState.wallets[2];
+            document.getElementById('final-money-1').innerText = `$${w1.toLocaleString()}`;
+            document.getElementById('final-money-2').innerText = `$${w2.toLocaleString()}`;
+            document.getElementById('winner-text').innerText = w1 > w2 ? "Team 1 Wins!" : w2 > w1 ? "Team 2 Wins!" : "It's a Tie!";
+        }
+    </script>
+</body>
+</html>
